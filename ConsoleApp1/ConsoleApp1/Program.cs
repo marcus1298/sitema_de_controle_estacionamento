@@ -32,75 +32,92 @@ namespace Estacionamento
 
             Console.WriteLine(new string('*', 50 / 2 - texto.Length / 2) + texto + new string('*', 50 / 2 - texto.Length / 2));
 
-            while (true) // loop infinito para controlar a entrada e saída de carros
+            const int numVagas = 10;
+            Stack<string> estacionamento = new Stack<string>(numVagas);
+
+            bool continuar = true;
+
+            while (continuar)
             {
-                Console.WriteLine("Digite 'E' para entrar com um carro ou 'S' para sair com um carro:");
-                string opcao = Console.ReadLine().ToUpper();
+                Console.WriteLine("Escolha uma opção:");
+                Console.WriteLine("1 - Entrar com um carro");
+                Console.WriteLine("2 - Retirar um carro");
+                Console.WriteLine("3 - Sair");
 
-                if (opcao == "E")
+                string opcaoStr = Console.ReadLine();
+                int opcao;
+
+                if (int.TryParse(opcaoStr, out opcao))
                 {
-                    int vaga = EncontrarVagaDisponivel();
+                    switch (opcao)
+                    {
+                        case 1:
+                            if (estacionamento.Count >= numVagas)
+                            {
+                                Console.WriteLine("Estacionamento lotado. Não há vagas disponíveis.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Digite a placa do carro:");
+                                string placa = Console.ReadLine();
 
-                    if (vaga == -1) // não há vagas disponíveis
-                    {
-                        Console.WriteLine("Não há vagas disponíveis no momento.");
-                    }
-                    else
-                    {
-                        vagas[vaga] = true; // ocupa a vaga disponível
-                        Console.WriteLine("O carro foi estacionado na vaga {0}.", vaga + 1);
-                    }
-                }
-                else if (opcao == "S")
-                {
-                    Console.WriteLine("Digite o número da vaga que o carro está ocupando:");
-                    int vaga = int.Parse(Console.ReadLine()) - 1;
+                                estacionamento.Push(placa);
 
-                    if (vagas[vaga]) // a vaga está ocupada
-                    {
-                        vagas[vaga] = false; // libera a vaga
-                        ReposicionarCarros(vaga); // reposiciona os carros no estacionamento
-                        Console.WriteLine("O carro foi retirado do estacionamento.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("A vaga está vazia. Não há carro para retirar.");
+                                Console.WriteLine("Carro estacionado com sucesso.");
+                            }
+                            break;
+                        case 2:
+                            if (estacionamento.Count == 0)
+                            {
+                                Console.WriteLine("Não há carros estacionados.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Digite a placa do carro que deseja retirar:");
+                                string placa = Console.ReadLine();
+
+                                Stack<string> temp = new Stack<string>(numVagas);
+
+                                while (estacionamento.Count > 0)
+                                {
+                                    string carro = estacionamento.Pop();
+                                    if (carro == placa)
+                                    {
+                                        Console.WriteLine("Carro retirado com sucesso.");
+                                        Console.WriteLine();
+                                        Console.Clear();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        temp.Push(carro);
+                                    }
+                                }
+
+                                while (temp.Count > 0)
+                                {
+                                    estacionamento.Push(temp.Pop());
+                                }
+                            }
+                            break;
+                        case 3:
+                            continuar = false;
+                            break;
+                        default:
+                            Console.WriteLine("Opção inválida. Tente novamente.");
+                            break;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Opção inválida. Digite 'E' ou 'S'.");
+                    Console.WriteLine("Opção inválida. Tente novamente.");
                 }
+                
+                Console.WriteLine();
+                Console.ReadLine();
+                Console.Clear();
             }
-        }
-
-        static int EncontrarVagaDisponivel()
-        {
-            for (int i = 0; i < vagas.Length; i++)
-            {
-                if (!vagas[i])
-                {
-                    return i;
-                }
-            }
-
-            return -1; // não há vagas disponíveis
-        }
-
-        static void ReposicionarCarros(int vagaLiberada)
-        {
-            for (int i = vagaLiberada + 1; i < vagas.Length; i++)
-            {
-                if (vagas[i]) // o carro da vaga i bloqueia a saída
-                {
-                    vagas[i] = false; // remove o carro da vaga i
-                    vagas[i - 1] = true; // coloca o carro na vaga i - 1
-                }
-                else //se não há mais carros bloqueando a saída
-                {
-                    break;
-                }
-            }
+            
         }
     }
 }
